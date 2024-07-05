@@ -38,27 +38,35 @@ set(FAISS_TEST_SRC
 )
 
 add_executable(faiss_test ${FAISS_TEST_SRC})
+add_executable(test_map3 test_map3.cpp)
 
 if(NOT FAISS_OPT_LEVEL STREQUAL "avx2" AND NOT FAISS_OPT_LEVEL STREQUAL "avx512")
   target_link_libraries(faiss_test PRIVATE faiss)
+  target_link_libraries(test_map3 PRIVATE faiss)
 endif()
 
 if(FAISS_OPT_LEVEL STREQUAL "avx2")
   if(NOT WIN32)
     target_compile_options(faiss_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma>)
+    target_compile_options(test_map3 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma>)
   else()
     target_compile_options(faiss_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
+    target_compile_options(test_map3 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
   endif()
   target_link_libraries(faiss_test PRIVATE faiss_avx2)
+  target_link_libraries(test_map3 PRIVATE faiss_avx2)
 endif()
 
 if(FAISS_OPT_LEVEL STREQUAL "avx512")
   if(NOT WIN32)
     target_compile_options(faiss_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mavx512f -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw>)
+    target_compile_options(test_map3 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mavx512f -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw>)
   else()
     target_compile_options(faiss_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX512>)
+    target_compile_options(test_map3 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX512>)
   endif()
   target_link_libraries(faiss_test PRIVATE faiss_avx512)
+  target_link_libraries(test_map3 PRIVATE faiss_avx512)
 endif()
 
 include(FetchContent)
@@ -93,6 +101,11 @@ find_package(OpenMP REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 
 target_link_libraries(faiss_test PRIVATE
+  OpenMP::OpenMP_CXX
+  GTest::gtest_main
+  $<$<BOOL:${FAISS_ENABLE_RAFT}>:raft::raft>
+)
+target_link_libraries(test_map3 PRIVATE
   OpenMP::OpenMP_CXX
   GTest::gtest_main
   $<$<BOOL:${FAISS_ENABLE_RAFT}>:raft::raft>
