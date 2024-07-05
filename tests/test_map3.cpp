@@ -109,12 +109,20 @@ int main() {
    // for (long idx : indices) 
     {
         auto idx = target_id;
-        std::vector<float> vec(d);
-        index_id_map.reconstruct(idx, vec.data());
-        std::cout << "向量 " << idx << " :";
-        for (int j = 0; j < d; j++) {
-            std::cout << " " << vec[j];
-        }
+        // std::vector<float> vec(d);
+        // index_id_map.reconstruct(idx, vec.data());
+
+        float *vec = nullptr;
+        size_t n = 0;
+
+        index_id_map.reconstruct_multi(idx, vec, n);
+        std::cout << "向量 " << idx << " :" << " chunking num "  << n << std::endl;
+        // for(int i=0; i < n;i++){
+        //     for (int j = 0; j < d; j++) {
+        //         std::cout << " " << vec[i*d + j];
+        //     }
+        //     std::cout << std::endl;
+        // }
         std::cout << std::endl;
     }
     cout<<"vector size:"<<index_id_map.ntotal<<endl;

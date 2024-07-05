@@ -1,8 +1,13 @@
 #include <faiss/IndexIDMap3.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cinttypes>
+#include <stdexcept>
+#include <vector>
+#include <string.h>
 
+#include "faiss/MetricType.h"
 #include "faiss/impl/FaissAssert.h"
 
 namespace faiss{
@@ -84,6 +89,36 @@ void IndexIDMap3Template<IndexT>::reconstruct(
         
 
         this->index->reconstruct(inner_id_vec[0], recons);
+    } catch (const std::out_of_range&) {
+        FAISS_THROW_FMT("key %" PRId64 " not found", key);
+    }
+}
+
+
+template <typename IndexT>
+void IndexIDMap3Template<IndexT>::reconstruct_multi(
+    idx_t key,
+    component_t*& recons, size_t& n) const {
+    try {
+        const auto& inner_ids = rev_map.at(key);
+
+        size_t inner_n = inner_ids.size();
+        if (inner_n == 0) {
+            FAISS_THROW_FMT("key %" PRId64 " not found", key);
+        }
+        
+        if (recons == nullptr){
+            recons = new component_t[inner_n*this->index->d];
+            std::fill_n(recons, inner_n*this->index->d, static_cast<component_t>(0));
+        }else{
+            FAISS_THROW_MSG("reconstruct_multi need alloc in faiss");
+        }
+
+        for(size_t i=0;i<inner_n;i++){
+            this->index->reconstruct(inner_ids[i], &recons[i*(this->index->d)]);
+        }
+
+        n = inner_n;
     } catch (const std::out_of_range&) {
         FAISS_THROW_FMT("key %" PRId64 " not found", key);
     }
