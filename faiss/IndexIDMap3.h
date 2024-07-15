@@ -2,8 +2,8 @@
 
 #include <faiss/Index.h>
 #include <faiss/IndexBinary.h>
-#include <faiss/impl/IDSelector.h>
 #include <faiss/IndexIDMap.h>
+#include <faiss/impl/IDSelector.h>
 
 #include <unordered_map>
 #include <vector>
@@ -30,7 +30,9 @@ struct IndexIDMap3Template : IndexIDMapTemplate<IndexT> {
 
     void reconstruct(idx_t key, component_t* recons) const override;
 
-    void reconstruct_multi(idx_t key, component_t*& recons, size_t &n) const;
+    void get_reconstruct_multi_nums(idx_t key, size_t& n) const;
+
+    void reconstruct_multi(idx_t key, component_t*& recons, size_t& n) const;
 
     /// check that the rev_map and the id_map are in sync
     void check_consistency() const;
